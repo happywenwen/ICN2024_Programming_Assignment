@@ -4,24 +4,46 @@ from datetime import datetime
 # Function to calculate the expression
 def calculate_expression(expression):
     # TODO: Implement this function
-    pass
+    if '+' in expression:
+        symbol_index = expression.find('+')
+        number1 = float(expression[:symbol_index])
+        number2 = float(expression[symbol_index+1:])
+        ans = number1 + number2
+    if '-' in expression:
+        symbol_index = expression.find('-')
+        number1 = float(expression[:symbol_index])
+        number2 = float(expression[symbol_index+1:])
+        ans = number1 - number2
+    if '*' in expression:
+        symbol_index = expression.find('*')
+        number1 = float(expression[:symbol_index])
+        number2 = float(expression[symbol_index+1:])
+        ans = number1 * number2
+    if '/' in expression:
+        symbol_index = expression.find('/')
+        number1 = float(expression[:symbol_index])
+        number2 = float(expression[symbol_index+1:])
+        ans = number1 / number2
+    return ans
 
 # Server setup
 # Specify the IP address and port number (Use "127.0.0.1" for localhost on local machine)
 # TODO Start
-HOST, PORT =
+HOST, PORT = "127.0.0.1", 7777
 # TODO end
 
 with open('./server_log.txt', 'w') as logFile:
     # 1. Create a socket
     # 2. Bind the socket to the address
     # TODO Start
-    serverSocket =
+    serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serverSocket.bind((HOST, PORT))
     # TODO End
 
     while True:
         # Listen to a new request with the socket
         # TODO Start
+        serverSocket.listen(0)
         # TODO End
 
         now = datetime.now()
@@ -32,7 +54,7 @@ with open('./server_log.txt', 'w') as logFile:
 
         # Accept a new request and admit the connection
         # TODO Start
-        client, address =
+        client, address = serverSocket.accept()
         # TODO End
 
         client.settimeout(15)
@@ -47,7 +69,7 @@ with open('./server_log.txt', 'w') as logFile:
 
                 # Recieve the data from the client
                 # TODO Start
-                question =
+                question = client.recv(1000).decode("utf-8")
                 # TODO End
 
                 now = datetime.now()
@@ -63,6 +85,8 @@ with open('./server_log.txt', 'w') as logFile:
 
                 # Send the answer back to the client
                 # TODO Start
+                client.send(message.encode("utf-8"))
+                ans = client.recv(1000).decode("utf-8")
                 # TODO End
 
                 # Terminate the process or continue
