@@ -55,7 +55,7 @@ while True:
 
         # Error handling if the file is not found in cache
         except FileNotFoundError:
-            if file_exist == "false":
+            try:
                 # Create a socket on the proxy server
                 # TODO Start
                 proxy_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -64,28 +64,36 @@ while True:
                 host_name = filename.replace("www.", "", 1)
                 print("Host name is " + host_name)
 
-                try:
-                    print("Trying to connect to the web server")
-                    # Connect the socket to the web server port
-                    # TODO Start
-                    proxy_server_socket.connect(("127.0.0.1", 7777))
-                    # TODO End
-                    print("Connected successfully")
+                print("Trying to connect to the web server")
+                # Connect the socket to the web server port
+                # TODO Start
+                proxy_server_socket.connect(("127.0.0.1", 7777))
+                # TODO End
+                print("Connected successfully")
 
-                    # Create a temporary file on this socket
-                    file_obj = proxy_server_socket.makefile('rw', None)
+                # Create a temporary file on this socket
+                file_obj = proxy_server_socket.makefile('rw', None)
 
-                    # Create the HTTP GET request message to fetch the file from the web server
-                    # Write the request to the file-like object
-                    request_message = f"GET {file_path} HTTP/1.0\r\n"
-                    print(request_message)
-                    file_obj.write(request_message)  # Write the request to the file-like object
-                    file_obj.flush()
-                    print("Sent the request to the web server successfully")
+                # Create the HTTP GET request message to fetch the file from the web server
+                # Write the request to the file-like object
+                request_message = f"GET {file_path} HTTP/1.0\r\n"
+                print(request_message)
+                file_obj.write(request_message)  # Write the request to the file-like object
+                file_obj.flush()
+                print("Sent the request to the web server successfully")
 
-                    # Read the response into buffer
-                    # TODO Start
-                    server_message = file_obj.readlines()
+                # Read the response into buffer
+                # TODO Start
+                server_message = file_obj.readlines()
+
+                # Check if web server haa the file
+                if "404" in server_message[0]:
+                    file_exist = "false"
+                else:
+                    file_exist = "true"
+
+                # Web server has the file
+                if file_exist == "true":
                     html_content = server_message[server_message.index('<!DOCTYPE html>\n'):]
                     print("Read the file from the web server successfully")
 
@@ -104,17 +112,17 @@ while True:
                         client_socket.send(response_body.encode("utf-8"))
                     # TODO End
                     print("Sent the data from the web server to the client")
-                except:
-                    print("Illegal request")
-            else:
-                # HTTP response message for file not found
-                # TODO Start
-                response_header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html; encoding=utf8\r\n\r\n"
-                client_socket.send(response_header.encode("utf-8"))
-                response_body = "<!DOCTYPE html>\n<html>\n<head>\n<title>404 Not Found</title>\n</head>\n<body>\n<h1>404 Not Found</h1>\n</body>\n</html>"
-                client_socket.send(response_body.encode("utf-8"))
-                # TODO End
+                else:
+                    # HTTP response message for file not found
+                    # TODO Start
+                    response_header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html; encoding=utf8\r\n\r\n"
+                    client_socket.send(response_header.encode("utf-8"))
+                    response_body = "<!DOCTYPE html>\n<html>\n<head>\n<title>404 Not Found</title>\n</head>\n<body>\n<h1>404 Not Found</h1>\n</body>\n</html>"
+                    client_socket.send(response_body.encode("utf-8"))
+                    # TODO End
 
+            except:
+                print("Illegal request")
     finally:
         # Close the client socket
         client_socket.close()
