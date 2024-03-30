@@ -98,5 +98,9 @@ while True:
     except IOError:
         # If the requested file is not found, send a 404 Not Found response
         # TODO Start
-        pass
+        response_header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html; encoding=utf8\r\n\r\n"
+        connectionSocket.send(response_header.encode("utf-8"))
+        response_body = "<!DOCTYPE html>\n<html>\n<head>\n<title>404 Not Found</title>\n</head>\n<body>\n<h1>404 Not Found</h1>\n</body>\n</html>"
+        connectionSocket.send(response_body.encode("utf-8"))
+        connectionSocket.close()
         # TODO End
